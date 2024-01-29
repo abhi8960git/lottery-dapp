@@ -22,6 +22,7 @@ mod lottery {
     pub fn init_master(_ctx: Context<InitMaster>) -> Result<()> {
         // write logic here
         // what is the master -> an object that gonna hold last lottery id
+        pub fn create_lottery(_ctx: Context<CreateLottery>) -> Result<()> {}
 
         Ok(())
     }
@@ -49,4 +50,33 @@ pub struct InitMaster<'info> {
 #[account]
 pub struct Master {
     pub last_id: u32,
+}
+
+
+#[derive(Account)]
+
+pub struct CreateLottery<'info> {
+    // account initilization
+    #[account(
+        init,
+        payer = authority,
+        space = 4 + 32 + 8 + 4 + 1 + 4 + 1 + 8 ,
+        seeds = [LOTTERY_SEED.as_bytes(), &(master.last_id + 1).to_le_bytes()],
+        bump,
+    )]
+    pub lottery: Account<'info, Lottery>,
+    #[account(mut)]
+    pub authurity: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+
+#[account]
+
+pub struct Lottery {
+    pub id: u32,
+    pub authority: PubKey,
+    pub ticket_price: u64,
+    pub last_ticket_id: u32,
+    pub winner_id: Option<u32>,
+    pub claimed: bool,
 }
